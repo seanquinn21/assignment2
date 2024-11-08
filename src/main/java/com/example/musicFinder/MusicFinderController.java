@@ -21,7 +21,7 @@ public class MusicFinderController {
     }
 
     // Fetch lyrics from Lyrics.ovh API and clean newline characters
-    private String getFormattedLyrics(String artist, String song) {
+    public String getFormattedLyrics(String artist, String song) {
         String apiUrl = "https://api.lyrics.ovh/v1/" + artist + "/" + song;
         RestTemplate restTemplate = new RestTemplate();
         try {

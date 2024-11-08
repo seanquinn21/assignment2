@@ -1,38 +1,56 @@
-name: Java CI with Maven
+name: Checking AS02 Build
 
 on:
   push:
     branches:
       - main
-  pull_request:
-    branches:
-      - main
 
 jobs:
-  build:
-
+  check-repo:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-    - name: Set up JDK 17
-      uses: actions/setup-java@v2
-      with:
-        distribution: 'temurin'
-        java-version: '17'
+      - name: Set up JDK 19
+        uses: actions/setup-java@v4
+        with:
+          java-version: '19'
+          distribution: 'temurin'
+          cache: maven
 
-    - name: Cache Maven packages
-      uses: actions/cache@v2
-      with:
-        path: ~/.m2
-        key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
-        restore-keys: |
-          ${{ runner.os }}-m2-
+      - name: Check number of branches
+        run: |
+          git fetch --all
+          git branch -r | grep -v main | wc -l # Check for non-main branches
 
-    - name: Build with Maven
-      run: mvn clean install
+      - name: Check commit history
+        run: |
+          git log --oneline | wc -l # Check number of commits
 
-    - name: Run tests
-      run: mvn test
+      - name: Validate CI workflow file
+        run: |
+          if [ -f ".github/workflows/CICD.yml" ]; then
+            echo "CI pipeline file found."
+          else
+            echo "CI pipeline file is missing."
+            exit 1
+          fi
+
+      - name: Build with Maven
+        run: mvn -B package --file pom.xml
+
+      - name: Run tests with Maven
+        run: mvn test
+
+      - name: Build Docker image
+        run: |
+          docker build -t musicfinder .
+          docker run -d -p 8080:8080 musicfinder &
+          sleep 10
+
+      - name: Check if Wikipedia API is functional
+        run: |
+          curl -X GET "http://localhost:8080/artist/Adele" -H "Accept: application/json"
+
