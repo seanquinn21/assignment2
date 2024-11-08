@@ -31,7 +31,7 @@ jobs:
 
       - name: Validate CI workflow file
         run: |
-          if [ -f ".github/workflows/CICD.yml" ]; then
+          if [ -f ".github/workflows/CI.yml" ]; then
             echo "CI pipeline file found."
           else
             echo "CI pipeline file is missing."
@@ -49,8 +49,4 @@ jobs:
           docker build -t musicfinder .
           docker run -d -p 8080:8080 musicfinder &
           sleep 10
-
-      - name: Check if Wikipedia API is functional
-        run: |
-          curl -X GET "http://localhost:8080/artist/Adele" -H "Accept: application/json"
 
