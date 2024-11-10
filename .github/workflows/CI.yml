@@ -49,4 +49,10 @@ jobs:
           docker build -t musicfinder .
           docker run -d -p 8080:8080 musicfinder &
           sleep 10
+      
+      - name: SonarCloud Scan
+        run: mvn sonar:sonar -Dsonar.organization=seanquinn21 -Dsonar.projectKey=seanquinn21_assignment2 -Dsonar.host.url=https://sonarcloud.io/ -Dsonar.login=${{ secrets.SONAR_TOKEN }}
 
+
+env:
+  SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
