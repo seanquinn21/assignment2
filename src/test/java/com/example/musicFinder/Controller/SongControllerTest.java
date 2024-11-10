@@ -25,7 +25,7 @@ public class SongControllerTest {
     private MusicFinderController musicFinderController;
 
     @Test
-    public void testRetrieveLyrics_ValidSong() {
+    void testRetrieveLyrics_ValidSong() {
         String band = "Oasis";
         String track = "Wonderwall";
         String mockApiResponse = "{\"lyrics\":\"Today is gonna be the day that they gonna throw it back to you\"}";
