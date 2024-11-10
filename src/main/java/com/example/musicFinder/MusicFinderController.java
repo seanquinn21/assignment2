@@ -35,8 +35,8 @@ public String getFormattedLyrics(String artist, String song) {
         String rawJson = restTemplate.getForObject(apiUrl, String.class);
 
         // Parse the JSON to extract the lyrics
-        ObjectMapper objectMapper = new ObjectMapper();
-        JsonNode jsonNode = objectMapper.readTree(rawJson);
+        ObjectMapper Obj_m = new ObjectMapper();
+        JsonNode jsonNode = Obj_m.readTree(rawJson);
         String rawLyrics = jsonNode.get("lyrics").asText();
 
         // Step 1: Remove carriage returns (\r)
