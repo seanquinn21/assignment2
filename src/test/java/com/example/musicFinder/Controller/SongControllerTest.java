@@ -11,6 +11,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
+
 import static org.mockito.Mockito.when;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -24,55 +25,52 @@ public class SongControllerTest {
     private MusicFinderController musicFinderController;
 
     @Test
-    public void testFetchLyrics_ValidSong() throws Exception {
-        //Song and title
-        String artist = "Oasis";
-        String song = "Wonderwall";
-        String mockApiResponse = "{\"lyrics\": \"Today is gonna be the day that they're gonna throw it back to you...\"}";
+    public void testRetrieveLyrics_ValidSong() {
+        String band = "Oasis";
+        String track = "Wonderwall";
+        String mockApiResponse = "{\"lyrics\":\"Today is gonna be the day that they gonna throw it back to you\"}";
 
-        // Mocking the RestTemplate to return the mock API response
-        when(restTemplate.getForObject("https://api.lyrics.ovh/v1/" + artist + "/" + song, String.class))
+        // Simulating the RestTemplate to return a mock response
+        when(restTemplate.getForObject("https://api.lyrics.ovh/v1/" + band + "/" + track, String.class))
                 .thenReturn(mockApiResponse);
 
-        // Calling the controller
-        ObjectNode responseBody = musicFinderController.getSongDetails(artist, song);
+        // Invoking the controller method to retrieve the response
+        ObjectNode responseBody = musicFinderController.getSongDetails(band, track);
 
-        
+        // Creating a ResponseEntity to contain the response data and status
         ResponseEntity<ObjectNode> responseEntity = new ResponseEntity<>(responseBody, HttpStatus.OK);
 
-        
-        assertEquals(200, responseEntity.getStatusCode().value());
+        // Verifying that the response status is HTTP 200 OK
+        assertEquals(200, responseEntity.getStatusCodeValue());
 
-        // Assert that the response body contains the correct song details
-        assertEquals(artist, responseBody.get("artist").asText());
-        assertEquals(song, responseBody.get("song").asText());
+        // Verifying that the response contains the correct details
+        assertEquals(band, responseBody.get("artist").asText());
+        assertEquals(track, responseBody.get("song").asText());
         assertTrue(responseBody.get("lyrics").asText().contains("Today is gonna be the day"));
-
-        // Optional: Additional assertions
-        assertTrue(responseBody.get("youtubeSearch").asText().contains("Oasis Wonderwall"));
+        assertTrue(responseBody.get("youtubeSearch").asText().contains("Oasis+Wonderwall"));
     }
 
     @Test
-    public void testFetchLyrics_InvalidSong() throws Exception {
-        // Mock data for an invalid artist and song
-        String artist = "Unknown Artist";
-        String song = "Unknown Song";
+    public void testRetrieveLyrics_InvalidSong() throws Exception {
+        String band = "Unknown Band";
+        String track = "Unknown Track";
 
-        // Mocking the RestTemplate to throw an exception for an invalid request
-        when(restTemplate.getForObject("https://api.lyrics.ovh/v1/" + artist + "/" + song, String.class))
+        // Simulating the RestTemplate to throw an exception for an invalid song request
+        when(restTemplate.getForObject("https://api.lyrics.ovh/v1/" + band + "/" + track, String.class))
                 .thenThrow(new RuntimeException("404 Not Found"));
 
-        // call controller for response 
-        String responseBody = musicFinderController.getFormattedLyrics(artist, song);
+        // Invoking the controller method to retrieve the response for an invalid song
+        String responseBody = musicFinderController.getFormattedLyrics(band, track);
 
-        
+        // Parsing the response to confirm the error message
         ObjectMapper objectMapper = new ObjectMapper();
         JsonNode responseJson = objectMapper.readTree(responseBody);
 
-        // error message 
-        assertNotNull(responseJson.get("error"), "Expected an 'error' field in the response body");
+        // Verifying that the response contains an "error" field with the appropriate message
+        assertNotNull(responseJson.get("error"), "Expected an 'error' field in the response");
         assertEquals("Lyrics not found", responseJson.get("error").asText());
     }
 }
+
 
 
